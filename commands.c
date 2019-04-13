@@ -139,12 +139,15 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 			Process job = FindPro(atoi(args[2]));
 			if(job != NULL)
 			{
-				int signal - -1*atoi(args[1]);
+				int signal = -1*atoi(args[1]);
 				if(kill(job->pID,signal) == -1)
 					printf("smash error: > kill %s – cannot send signal\n",args[2]);
 				else
 				{
-					
+					if(signal == SIGTSTP || signal == SIGINT)
+						job->is_running = 0;
+					if(signal == SIGCONT)
+						job->is_running = 1;
 				}
 			}
 			else
