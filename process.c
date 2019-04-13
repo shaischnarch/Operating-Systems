@@ -1,6 +1,6 @@
 #include "process.h"
 #include <stdlib.h>
-#include <stdio.h>
+#include <stdio.h> /* standard I/O functions */ 
 #include <time.h>
 #include <string.h>
 
