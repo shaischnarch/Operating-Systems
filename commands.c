@@ -19,6 +19,17 @@ bool first_wd = True; // first working directory
 extern List jobs_list;
 
 
+static Process FindPro(int jobnum)
+{
+	LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+	{
+		if(temp_pro->index == jobnum)
+			return temp_pro;
+	}
+	return NULL;
+}
+
+
 static void addhistory(char* cmdString)
 {
 	if(numhistory <= 50)
@@ -119,9 +130,26 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	}
 	
 	/*************************************************/
-	else if (!strcmp(cmd, "mkdir"))
+	else if (!strcmp(cmd, "kill"))
 	{
- 		
+ 		if(num_arg != 2)
+			illegal_cmd = TRUE;
+		else
+		{
+			Process job = FindPro(atoi(args[2]));
+			if(job != NULL)
+			{
+				int signal - -1*atoi(args[1]);
+				if(kill(job->pID,signal) == -1)
+					printf("smash error: > kill %s – cannot send signal\n",args[2]);
+				else
+				{
+					
+				}
+			}
+			else
+				printf("smash error: > kill %s – job does not exist\n", args[2]);
+		}
 	}
 	/*************************************************/
 	
