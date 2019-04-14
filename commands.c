@@ -16,14 +16,14 @@ int numhistory=0;//number of elements in history array
 char lwd[MAX_LINE_SIZE];// last working directory
 bool first_wd = True; // first working directory
 
-extern List jobs_list;//list of all jobs that are in the background (running or not running)
+extern List jobs;//list of all jobs that are in the background (running or not running)
 extern Process fg_job = NULL;//current job running in the foreground
 
 
 
 static Process FindPro(int jobnum)
 {
-	LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+	LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 	{
 		if(temp_pro->index == jobnum)
 			return temp_pro;
@@ -163,7 +163,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
  		if(num_arg != 0)
 			illegal_cmd = TRUE;
 		else
-			LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 				PrintPro(temp_pro);//prints each process;
 	}
 	/*************************************************/
@@ -180,28 +180,59 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 		if(num_arg == 0)
 		{
 			Process LastPro = NULL;//last process inside jobs list;
-			LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 				LastPro = temp_pro;
-			if(LastPro != NULL)
+			if(LastPro != NULL) //if there is a job in the list;
 			{
-				if(LastPro->is_running == 0)
+				if(LastPro->is_running == 0) // if the last job isnt running make it run;
 				{
 					kill(LastPro->pid,SIGCONT);
 					LastPro->is_running = 1;
 				}
-				fg_job = CopyPro(LastPro);
+				fg_job = CopyPro(LastPro); //make a copy of last process and place it in the foreground;
 				printf("%s\n", LastPro->name);
-				LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and removing the last process;
 				{
 					if(temp_pro->pid == LastPro->pid)
-						listRemoveCurrent(jobs_list);
+						listRemoveCurrent(jobs);
 				}
-				waitpid(LastPro->pid, NULL, 2);
+				waitpid(LastPro->pid, NULL, WUNTRACED); // wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
 			}
+			else
+				printf("fg: current: no such job\n");
 		}
 		else if(num_arg == 1)
 		{
-			
+			Process TargetPro = NULL;
+			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
+				if(temp_pro->index == atoi(args[1]))
+				{
+					TargetPro = temp_pro;
+					break;
+				}
+			if(TargetPro != NULL)
+			{
+				if(TargetPro->is_running == 0) // if the target job isnt running make it run;
+				{
+					kill(TargetPro->pid,SIGCONT);
+					TargetPro->is_running = 1;
+				}
+				fg_job = CopyPro(TargetPro); //make a copy of targer process and place it in the foreground;
+				printf("%s\n", TargetPro->name);
+				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and subtracting the index of process with bigger indexes than target;
+				{
+					if((temp_pro->index) > (TargetPro->index))
+						(temp_pro->index)--;
+				}
+				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and removing the target process;
+				{
+					if(temp_pro->pid == TargetPro->pid)
+						listRemoveCurrent(jobs);
+				}
+				waitpid(LastPro->pid, NULL, WUNTRACED); // wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
+			}
+			else
+				printf("fg: %d: no such job\n", atoi(args[1]));
 		}
 		else
 			illegal_cmd = TRUE;
@@ -209,7 +240,44 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-  		
+		if(num_arg == 0)
+		{
+			Process LastSusPro = NULL;//last suspanded process inside jobs list;
+			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
+				if(temp_pro->is_running == 0)
+					LastSusPro = temp_pro;
+			if(LastSusPro != NULL) //if there is a suspended job in the list;
+			{
+				kill(LastSusPro->pid,SIGCONT);
+				LastSusPro->is_running = 1;
+				printf("%s\n", LastPro->name);
+			}
+			else
+				printf("bg: current: no such job\n");
+		}
+		else if(num_arg == 1)
+		{
+			Process TargetSusPro = NULL;
+			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
+				if(temp_pro->index == atoi(args[1]))
+				{
+					TargetSusPro = temp_pro;
+					break;
+				}
+			if(TargetSusPro != NULL)//if the target suspended process exists
+			{
+				if(TargetSusPro->is_running == 0) // if the target suspended job isnt running make it run;
+				{
+					kill(TargetPro->pid,SIGCONT);
+					TargetPro->is_running = 1;
+				}
+				printf("%s\n", TargetPro->name);
+			}
+			else
+				printf("bg: %d: no such job\n", atoi(args[1]));
+		}
+		else
+			illegal_cmd = TRUE;
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
