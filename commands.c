@@ -282,7 +282,73 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
 	{
-   		
+   		if(num_arg == 0)
+		{
+			listDestroy(jobs);
+			if(fg_job != NULL)
+				DeletePro(fg_job);
+			return 0;
+		}
+		else if(num_arg == 1)
+		{
+			if (strcmp(args[1], "kill")) 
+				illegal_cmd = TRUE;
+			else
+			{
+				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
+				{
+					printf("[%d] %s - sending SIGTERM... ", temp_pro->index,temp_pro->name);
+					kill(pro->pid, SIGTERM);
+					sleep(5);
+					if(waitpid(temp_pro->pid, NULL, WNOHANG) == 0)
+					{
+						printf("(5 sec passed) Sending SIGKILL... Done.\n");
+						kill(temp_pro->pid, SIGKILL);
+					}
+					else
+						printf("Done.\n");
+				}
+				listDestroy(jobs);
+				if(fg_job != NULL)
+					DeletePro(fg_job);
+				return 0;
+			}
+		}
+		else
+			illegal_cmd = TRUE;
+	} 
+	/*************************************************/
+	else if (!strcmp(cmd, "cp"))
+	{
+   		if(num_arg != 2)
+			illegal_cmd = TRUE;
+		else
+		{
+			int    c;//used for copying files
+			FILE    *stream_R;
+			FILE	*stream_W;
+			
+			stream_R = fopen(args[1], "r");//open source file
+			if (stream_R == NULL)//error opening source
+				printf("cp: %s: no such file\n", args[1]);
+			else
+			{
+				stream_W = fopen(args[2], "w");   //create and write to file
+				if (stream_W == NULL)//error opening target
+				{
+					fclose (stream_R);
+					printf("cp: %s: error making file\n", args[2]);
+				}
+				else
+				{
+					while ((c = fgetc(stream_R)) != EOF)//copies source into target
+						fputc (c, stream_W);
+					fclose (stream_R);
+					fclose (stream_W);
+					printf("cp: %s has been copied to %s\n", args[1], args[2]);
+				}
+			}
+		}
 	} 
 	/*************************************************/
 	else // external command
