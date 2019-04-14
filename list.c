@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h> /* standard I/O functions */ 
 #include <stdlib.h>
 #include <stdbool.h>
 #include "list.h"

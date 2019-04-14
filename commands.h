@@ -1,12 +1,12 @@
 #ifndef _COMMANDS_H
 #define _COMMANDS_H
-#include <unistd.h> 
-#include <stdio.h>
+#include <unistd.h>  /* standard unix functions, like getpid() */ 
+#include <stdio.h> /* standard I/O functions */ 
 #include <time.h>
 #include <stdlib.h>
-#include <signal.h>
+#include <signal.h> /* signal name macros, and the signal() prototype */ 
 #include <string.h>
-#include <sys/types.h>
+#include <sys/types.h> /* various type definitions, like pid_t */
 #include <sys/wait.h>
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
