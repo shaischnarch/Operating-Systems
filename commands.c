@@ -16,7 +16,9 @@ int numhistory=0;//number of elements in history array
 char lwd[MAX_LINE_SIZE];// last working directory
 bool first_wd = True; // first working directory
 
-extern List jobs_list;
+extern List jobs_list;//list of all jobs that are in the background (running or not running)
+extern Process fg_job = NULL;//current job running in the foreground
+
 
 
 static Process FindPro(int jobnum)
@@ -175,7 +177,34 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
 	{
-		
+		if(num_arg == 0)
+		{
+			Process LastPro = NULL;//last process inside jobs list;
+			LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+				LastPro = temp_pro;
+			if(LastPro != NULL)
+			{
+				if(LastPro->is_running == 0)
+				{
+					kill(LastPro->pid,SIGCONT);
+					LastPro->is_running = 1;
+				}
+				fg_job = CopyPro(LastPro);
+				printf("%s\n", LastPro->name);
+				LIST_FOREACH(Process,temp_pro,jobs_list)//for loop running on all the process in jobs_list;
+				{
+					if(temp_pro->pid == LastPro->pid)
+						listRemoveCurrent(jobs_list);
+				}
+				waitpid(LastPro->pid, NULL, 2);
+			}
+		}
+		else if(num_arg == 1)
+		{
+			
+		}
+		else
+			illegal_cmd = TRUE;
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
