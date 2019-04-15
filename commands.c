@@ -371,7 +371,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG], char* cmdString)
+void ExeExternal(char *args[MAX_ARG], char* cmdString, int comp_flag, int bg_flag) // for flags, 1 is true and 0 is false
 {
 	int pID;
     	switch(pID = fork()) 
@@ -379,25 +379,39 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
     		case -1: 
 					// Add your code here (error)
 					
-					/* 
-					your code
-					*/
+					perror("failed to fork\n");
+					exit(-1);
         	case 0 :
                 	// Child Process
                		setpgrp();
 					
 			        // Add your code here (execute an external command)
 					
-					/* 
-					your code
-					*/
+					if(comp_flag == 1)
+						execl("/bin/bash", "/bin/bash", "-c", "-f", cmdString, (char*)NULL);//make bash run the complicated command
+					else
+						execv(args[0], args);//execute the program
+					
+					perror("failed to execute\n");//if we got here, program or command failed
+					exit(-1);
 			
 			default:
                 	// Add your code here
 					
-					/* 
-					your code
-					*/
+					if (bg_flag == 1) //if we need to run in the background;
+					{
+						int index = listGetSize(jobs);//finds the number of process in the list
+						Process temp_bg = CreatPro(cmdString, pID, index); //creates temp process
+
+						listInsertLast(jobs, temp_bg);
+						processDelete(temp_bg);
+					} 
+					else 
+					{
+						fg_process = CreatPro(cmdString, pID, -1);
+						waitpid(fg_process->pid, NULL, WUNTRACED);// wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
+
+					}
 	}
 }
 //**************************************************************************************
@@ -408,15 +422,21 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 //**************************************************************************************
 int ExeComp(char* lineSize)
 {
+	int bg_flag = 0;
 	char ExtCmd[MAX_LINE_SIZE+2];
 	char *args[MAX_ARG];
+	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
 		// Add your code here (execute a complicated command)
 					
-		/* 
-		your code
-		*/
+		if (lineSize[strlen(lineSize)-2] == '&')
+		{
+			lineSize[strlen(lineSize)-2] = '\0';
+			bg_flag = 1;
+		}
+		strcpy(ExtCmd, lineSize);
+		
 	} 
 	return -1;
 }
