@@ -7,8 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h> /* signal name macros, and the signal() prototype */ 
+#include "process.h"
+#include "list.h"
 
-
+void signalCtrlC(int signum);
+void signalCtrlZ(int signum);
+void signalCLD(int signum);
 
 #endif
 

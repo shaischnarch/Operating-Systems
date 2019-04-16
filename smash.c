@@ -13,8 +13,14 @@ main file. This file contains the main function of smash
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
 
+
+//List history_list; change here decleration
+List jobs;
+Process fg_job;
+//int program_done;
+
 char* L_Fg_Cmd;
-void* jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
+List jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
 char lineSize[MAX_LINE_SIZE]; 
 //**************************************************************************************
 // function name: main
@@ -28,6 +34,30 @@ int main(int argc, char *argv[])
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
 	 /* add your code here */
+	 
+	 	struct sigaction SigactionZ;
+    	sigset_t MaskZ;
+    	sigfillset(&MaskZ);
+    	SigactionZ.sa_flags = SA_RESTART;
+    	SigactionZ.sa_mask = MaskZ;
+    	SigactionZ.sa_handler = signalCtrlZ;	// ctrl+z
+        sigaction(SIGTSTP, &SigactionZ, NULL);
+
+    	struct sigaction SigactionC;
+    	sigset_t MaskC;
+    	sigfillset(&MaskC);
+    	SigactionC.sa_flags = SA_RESTART;
+    	SigactionC.sa_mask = MaskC;
+    	SigactionC.sa_handler = signalCtrlC;	// ctrl+c
+        sigaction(SIGINT, &SigactionC, NULL);
+
+    	struct sigaction SigactionCLD;
+    	sigset_t MaskCLD;
+    	sigfillset(&MaskCLD);
+    	SigactionCLD.sa_flags = SA_RESTART;
+    	SigactionCLD.sa_mask = MaskCLD;
+    	SigactionCLD.sa_handler = signalCLD;	// child
+        sigaction(SIGCHLD, &SigactionCLD, NULL);
 	
 	/************************************/
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
@@ -38,7 +68,13 @@ int main(int argc, char *argv[])
 
 	/************************************/
 	// Init globals 
+	
+	
+  //change!!  history_list=listCreate(string_copy,string_free);
+    jobs   =listCreate(processCopy, processDelete);
+    fg_job = NULL;
 
+   // program_done=0;
 
 	
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
@@ -62,6 +98,9 @@ int main(int argc, char *argv[])
 		/* initialize for next line read*/
 		lineSize[0]='\0';
 		cmdString[0]='\0';
+		
+		//		if(program_done) break;
+
 	}
     return 0;
 }

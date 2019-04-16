@@ -14,7 +14,7 @@ char jobshistory[50][MAX_LINE_SIZE];//history array containing old commands
 int starthistory=0;//starting lockation of history array
 int numhistory=0;//number of elements in history array
 char lwd[MAX_LINE_SIZE];// last working directory
-bool first_wd = True; // first working directory
+bool first_wd = TRUE; // first working directory
 
 extern List jobs;//list of all jobs that are in the background (running or not running)
 extern Process fg_job = NULL;//current job running in the foreground
@@ -142,7 +142,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 			if(job != NULL)
 			{
 				int signal = -1*atoi(args[1]);
-				if(kill(job->pID,signal) == -1)
+				if(kill(job->pid,signal) == -1)
 					printf("smash error: > kill %s – cannot send signal\n",args[2]);
 				else
 				{
@@ -189,6 +189,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 					kill(LastPro->pid,SIGCONT);
 					LastPro->is_running = 1;
 				}
+				
 				fg_job = CopyPro(LastPro); //make a copy of last process and place it in the foreground;
 				printf("%s\n", LastPro->name);
 				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and removing the last process;
@@ -409,7 +410,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, int comp_flag, int bg_fla
 					else 
 					{
 						fg_process = CreatPro(cmdString, pID, -1);
-						waitpid(fg_process->pid, NULL, WUNTRACED);// wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
+						waitpid(fg_process->pID, NULL, WUNTRACED);// wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
 
 					}
 	}
