@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);    	
 		cmdString[strlen(lineSize)-1]='\0';
+		addhistory(cmdString);//add to history array
 					// perform a complicated Command
 		if(!ExeComp(lineSize)) continue; 
 					// background command	

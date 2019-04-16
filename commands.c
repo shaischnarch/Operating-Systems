@@ -32,7 +32,7 @@ static Process FindPro(int jobnum)
 }
 
 
-static void addhistory(char* cmdString)
+void addhistory(char* cmdString)
 {
 	if(numhistory <= 50)
 		numhistory++;
@@ -354,11 +354,9 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
-		addhistory(cmdString);
- 		ExeExternal(args, cmdString);
+ 		ExeExternal(args, cmdString, 0, 0);
 	 	return 0;
 	}
-	addhistory(cmdString);
 	if (illegal_cmd == TRUE)
 	{
 		printf("smash error: > \"%s\"\n", cmdString);
@@ -391,8 +389,10 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, int comp_flag, int bg_fla
 					if(comp_flag == 1)
 						execl("/bin/bash", "/bin/bash", "-c", "-f", cmdString, (char*)NULL);//make bash run the complicated command
 					else
+					{
 						execv(args[0], args);//execute the program
-					
+						execvp(args[0], args);//not sure witch one works, so if first one does it wont get here, if it doesent this will try to run
+					}
 					perror("failed to execute\n");//if we got here, program or command failed
 					exit(-1);
 			
@@ -425,7 +425,7 @@ int ExeComp(char* lineSize)
 {
 	int bg_flag = 0;
 	char ExtCmd[MAX_LINE_SIZE+2];
-	char *args[MAX_ARG];
+	char *args[1];//for this case we only need one arg
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
@@ -436,8 +436,10 @@ int ExeComp(char* lineSize)
 			lineSize[strlen(lineSize)-2] = '\0';
 			bg_flag = 1;
 		}
-		strcpy(ExtCmd, lineSize);
-		
+		strcpy(ExtCmd, lineSize);// create a copy of the command without the & sign and send it to get excuted
+		args[0] = ExtCmd;
+		ExeExternal(args, ExtCmd, 1, bg_flag);//complicated comand
+		return 0;
 	} 
 	return -1;
 }
@@ -457,11 +459,21 @@ int BgCmd(char* lineSize, void* jobs)
 	{
 		lineSize[strlen(lineSize)-2] = '\0';
 		// Add your code here (execute a in the background)
-					
-		/* 
-		your code
-		*/
-		
+		char cmdString[MAX_LINE_SIZE];
+		strcpy(cmdString, lineSize);
+		int i = 0, num_arg = 0;
+		Command = strtok(lineSize, delimiters);
+		if (Command == NULL)
+			return 0; 
+		args[0] = Command;
+		for (i=1; i<MAX_ARG; i++)
+		{
+			args[i] = strtok(NULL, delimiters); 
+			if (args[i] != NULL) 
+				num_arg++; 
+		}			
+		ExeExternal(args, cmdString, 0, 1);//execute simple command (comp_flag = 0) but in the background (bg_flag = 1);	
+		return 0;
 	}
 	return -1;
 }
