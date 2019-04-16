@@ -17,7 +17,7 @@ main file. This file contains the main function of smash
 //List history_list; change here decleration
 List jobs;
 Process fg_job;
-//int program_done;
+int program_done;
 
 char* L_Fg_Cmd;
 List jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     jobs   =listCreate(processCopy, processDelete);
     fg_job = NULL;
 
-   // program_done=0;
+   program_done=0;
 
 	
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 		lineSize[0]='\0';
 		cmdString[0]='\0';
 		
-		//		if(program_done) break;
+		if(program_done) break;
 
 	}
     return 0;

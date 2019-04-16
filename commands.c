@@ -18,7 +18,7 @@ bool first_wd = TRUE; // first working directory
 
 extern List jobs;//list of all jobs that are in the background (running or not running)
 extern Process fg_job = NULL;//current job running in the foreground
-
+extern int program_done;
 
 
 static Process FindPro(int jobnum)
@@ -288,6 +288,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 			listDestroy(jobs);
 			if(fg_job != NULL)
 				DeletePro(fg_job);
+			program_done = 1;
 			return 0;
 		}
 		else if(num_arg == 1)
@@ -312,6 +313,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 				listDestroy(jobs);
 				if(fg_job != NULL)
 					DeletePro(fg_job);
+				program_done = 1;
 				return 0;
 			}
 		}

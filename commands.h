@@ -13,9 +13,11 @@
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
 typedef enum { FALSE , TRUE } bool;
+
+void addhistory(char* cmdString);
 int ExeComp(char* lineSize);
 int BgCmd(char* lineSize, void* jobs);
 int ExeCmd(void* jobs, char* lineSize, char* cmdString);
-void ExeExternal(char *args[MAX_ARG], char* cmdString);
+void ExeExternal(char *args[MAX_ARG], char* cmdString, int comp_flag, int bg_flag) // for flags, 1 is true and 0 is false
 #endif
 
