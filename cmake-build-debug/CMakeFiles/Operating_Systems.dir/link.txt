@@ -1,3 +1,0 @@
-"C:\Users\Matan Netzer\AppData\Local\JetBrains\CLion 2019.1\bin\cmake\win\bin\cmake.exe" -E remove -f CMakeFiles\Operating_Systems.dir/objects.a
-C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\ar.exe cr CMakeFiles\Operating_Systems.dir/objects.a @CMakeFiles\Operating_Systems.dir\objects1.rsp
-C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe -g   -Wl,--whole-archive CMakeFiles\Operating_Systems.dir/objects.a -Wl,--no-whole-archive  -o Operating_Systems.exe -Wl,--out-implib,libOperating_Systems.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Operating_Systems.dir\linklibs.rsp
