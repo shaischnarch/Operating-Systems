@@ -39,7 +39,7 @@ void addhistory(char* cmdString)
 	starthistory++;
 	if(starthistory >= 50)
 		starthistory = 0;
-	jobshistory[starthistory] = cmdString;
+	strcpy(jobshistory[starthistory], cmdString);
 }
 
 int ExeCmd(void* jobs, char* lineSize, char* cmdString)
@@ -47,6 +47,8 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	char* cmd; 
 	char* args[MAX_ARG];
 	char pwd[MAX_LINE_SIZE];
+	Process LastPro = NULL;//last process inside jobs list;
+	Process TargetPro = NULL;
 	char* delimiters = " \t\n";  
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = FALSE; // illegal command
@@ -73,7 +75,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 		else
 		{
 			getcwd(pwd, sizeof(pwd));
-			if(args[1] == '-')
+			if(!strcmp(args[1], "-"))
 			{
 				if(first_wd == FALSE)
 				{
@@ -179,7 +181,6 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	{
 		if(num_arg == 0)
 		{
-			Process LastPro = NULL;//last process inside jobs list;
 			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 				LastPro = temp_pro;
 			if(LastPro != NULL) //if there is a job in the list;
@@ -204,7 +205,6 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 		}
 		else if(num_arg == 1)
 		{
-			Process TargetPro = NULL;
 			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 				if(temp_pro->index == atoi(args[1]))
 				{
@@ -220,17 +220,18 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 				}
 				fg_job = CopyPro(TargetPro); //make a copy of targer process and place it in the foreground;
 				printf("%s\n", TargetPro->name);
-				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and subtracting the index of process with bigger indexes than target;
-				{
-					if((temp_pro->index) > (TargetPro->index))
-						(temp_pro->index)--;
-				}
 				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and removing the target process;
 				{
 					if(temp_pro->pid == TargetPro->pid)
 						listRemoveCurrent(jobs);
 				}
-				waitpid(LastPro->pid, NULL, WUNTRACED); // wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
+				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs and subtracting the index of process with bigger indexes than target;
+				{
+					if((temp_pro->index) > (TargetPro->index))
+						(temp_pro->index)--;
+				}
+				
+				waitpid(TargetPro->pid, NULL, WUNTRACED); // wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
 			}
 			else
 				printf("fg: %d: no such job\n", atoi(args[1]));
@@ -245,13 +246,13 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 		{
 			Process LastSusPro = NULL;//last suspanded process inside jobs list;
 			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
-				if(temp_pro->is_running == 0)
+				if(temp_pro && temp_pro->is_running == 0)
 					LastSusPro = temp_pro;
 			if(LastSusPro != NULL) //if there is a suspended job in the list;
 			{
 				kill(LastSusPro->pid,SIGCONT);
 				LastSusPro->is_running = 1;
-				printf("%s\n", LastPro->name);
+				printf("%s\n", LastSusPro->name);
 			}
 			else
 				printf("bg: current: no such job\n");
@@ -269,10 +270,10 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 			{
 				if(TargetSusPro->is_running == 0) // if the target suspended job isnt running make it run;
 				{
-					kill(TargetPro->pid,SIGCONT);
-					TargetPro->is_running = 1;
+					kill(TargetSusPro->pid,SIGCONT);
+					TargetSusPro->is_running = 1;
 				}
-				printf("%s\n", TargetPro->name);
+				printf("%s\n", TargetSusPro->name);
 			}
 			else
 				printf("bg: %d: no such job\n", atoi(args[1]));
@@ -300,7 +301,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 				LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 				{
 					printf("[%d] %s - sending SIGTERM... ", temp_pro->index,temp_pro->name);
-					kill(pro->pid, SIGTERM);
+					kill(temp_pro->pid, SIGTERM);
 					sleep(5);
 					if(waitpid(temp_pro->pid, NULL, WNOHANG) == 0)
 					{
@@ -404,15 +405,15 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, int comp_flag, int bg_fla
 					if (bg_flag == 1) //if we need to run in the background;
 					{
 						int index = listGetSize(jobs);//finds the number of process in the list
-						Process temp_bg = CreatPro(cmdString, pID, index); //creates temp process
+						Process temp_bg = CreatePro(cmdString, pID, index); //creates temp process
 
 						listInsertLast(jobs, temp_bg);
-						processDelete(temp_bg);
+						DeletePro(temp_bg);
 					} 
 					else 
 					{
-						fg_process = CreatPro(cmdString, pID, -1);
-						waitpid(fg_process->pID, NULL, WUNTRACED);// wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
+						fg_job = CreatePro(cmdString, pID, -1);
+						waitpid(fg_job->pid, NULL, WUNTRACED);// wait until the process in the foreground is finished (or it is stopped (WUNTRACED));
 
 					}
 	}

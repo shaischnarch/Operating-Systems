@@ -12,23 +12,21 @@ extern List jobs;
 //extern int job_index;
 
 void signalCtrlC(int signum) {
-		
+	
 	//note for self: check if extern int fg_process_runnig is necessary
-	if(fg_job == NULL)//you cant do Ctrl-C without fg_job, maybe change to fg_job == NULL
+	if(!fg_job->is_running)//you cant do Ctrl-C without fg_job, maybe change to fg_job == NULL
 		return;
 	if (kill(fg_job->pid,SIGINT) == -1){
 		printf("\nCan't stop job with PID=%d\n", fg_job->pid);
 	}
 	else {
-		
-		printf("\nJob with PID=%d was stopped\n", fg_job->pid);
 		DeletePro(fg_job);
-		fg_job=NULL;
+		printf("\nJob with PID=%d was stopped\n", fg_job->pid);
 	}
 }
 
 void signalCtrlZ(int signum) {
-	if(fg_job == NULL)//you cant do Ctrl-Z without fg_job, maybe change to fg_job == NULL
+	if(!fg_job->is_running)//you cant do Ctrl-Z without fg_job, maybe change to fg_job == NULL
 		return;
 
 	if (kill(fg_job->pid,SIGTSTP) == -1){
@@ -36,8 +34,8 @@ void signalCtrlZ(int signum) {
 	}
 	else {
 
-		if (listGetSize(jobs) == 0)
-			fg_job->index=1;
+		if (listGetSize(jobs_list) == 0)
+			fg_job->index==1;
 		else {
 			LIST_FOREACH(Process,temp_pro,jobs)//for loop running on all the process in jobs;
 			fg_job->index = temp_pro->index;
@@ -47,9 +45,8 @@ void signalCtrlZ(int signum) {
 		fg_job->is_running=0;
 
 		listInsertLast(jobs, fg_job);
-			printf("\nJob with PID=%d was suspended\n", fg_job->pid);
 			DeletePro(fg_job);
-			fg_job=NULL;
+			printf("\nJob with PID=%d was suspended\n", fg_job->pid);
 		
 	}
 }
@@ -57,8 +54,8 @@ void signalCtrlZ(int signum) {
 
 void signalCLD(int signum){
 	Process pro;
-	if(fg_job!=NULL) {// fg_job->is_running==1{
-		if(waitpid(fg_job->pid, NULL, 1)) {// what here instead of 1{
+	if(fg_job!=NULL) // fg_job->is_running==1{
+		if(waitpid(fg_job->pid, NULL, 1))// what here instead of 1{
 			free(fg_job);
 		}
 	}
@@ -68,8 +65,8 @@ void signalCLD(int signum){
 
 		for( ; pro != NULL ; pro = listGetNext(jobs)){
 			if(waitpid(pro->pid, NULL, 1)){
-				listRemoveCurrent(jobs);
-				pro = listGetFirst(jobs);
+				listRemoveCurrent(jobs_list);
+				pro = listGetFirst(jobs_list);
 				break;
 			}
 		}

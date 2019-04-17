@@ -5,7 +5,7 @@
 #include <string.h>
 
 Process CreatePro(char* name, int pid, int index) {
-	Process pro = malloc(sizeof(struct process_t));
+	Process pro = malloc(sizeof(process_t));
 	if (!pro)
 		return NULL;
 	pro->pid = pid;
@@ -17,7 +17,7 @@ Process CreatePro(char* name, int pid, int index) {
 }
 
 Process CopyPro(Process old_pro) {
-	Process temp_process = malloc(sizeof(struct process_t));
+	Process temp_process = malloc(sizeof(process_t));
 	if (!temp_process)
 		return NULL;
 	temp_process->index = old_pro->index;

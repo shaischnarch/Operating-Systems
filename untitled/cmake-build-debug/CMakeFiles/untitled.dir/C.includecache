@@ -1,0 +1,76 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Matan Netzer/Operating-Systems/untitled/commands.h
+unistd.h
+-
+stdio.h
+-
+time.h
+-
+stdlib.h
+-
+signal.h
+-
+string.h
+-
+sys/types.h
+-
+sys/wait.h
+-
+list.h
+C:/Users/Matan Netzer/Operating-Systems/untitled/list.h
+process.h
+C:/Users/Matan Netzer/Operating-Systems/untitled/process.h
+
+C:/Users/Matan Netzer/Operating-Systems/untitled/list.h
+string.h
+-
+
+C:/Users/Matan Netzer/Operating-Systems/untitled/process.h
+
+C:/Users/Matan Netzer/Operating-Systems/untitled/signals.h
+sys/types.h
+-
+sys/wait.h
+-
+unistd.h
+-
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+signal.h
+-
+process.h
+C:/Users/Matan Netzer/Operating-Systems/untitled/process.h
+list.h
+C:/Users/Matan Netzer/Operating-Systems/untitled/list.h
+
+C:/Users/Matan Netzer/Operating-Systems/untitled/smash.c
+sys/types.h
+-
+sys/wait.h
+-
+unistd.h
+-
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+signal.h
+-
+commands.h
+C:/Users/Matan Netzer/Operating-Systems/untitled/commands.h
+signals.h
+C:/Users/Matan Netzer/Operating-Systems/untitled/signals.h
+

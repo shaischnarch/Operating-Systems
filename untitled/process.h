@@ -20,7 +20,7 @@ struct process_t{
 };
 
 
-Process CreatePro(char* name,int pid, int index);
+Process CreatPro(char* name,int pid, int index);
 Process CopyPro(Process old_pro);
 void DeletePro(Process pro);
 void PrintPro(Process pro);
